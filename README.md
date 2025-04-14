@@ -1,6 +1,4 @@
-Parfait ! Voici un **document formel (style rapport)** uniquement centré sur les **fonctionnalités** et les **technologies utilisées**, prêt à être remis à ton professeur. Tu peux le copier dans un fichier `.docx` ou `.pdf`.
 
----
 
 # 📄 **Document de Présentation du Projet – Trip Agency**
 
@@ -83,4 +81,3 @@ Ce projet répond aux besoins d’une agence de voyage moderne grâce à :
 
 ---
 
-Souhaite-tu que je te le convertisse en **document Word ou PDF prêt à remettre** ?
