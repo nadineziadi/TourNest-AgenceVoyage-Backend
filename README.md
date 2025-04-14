@@ -35,6 +35,8 @@ Le projet **Trip Agency** est une application web distribuée destinée à la ge
 - Collecte d’avis et de notes via MongoDB.
 
 ---
+![Untitled Diagram drawio (1)](https://github.com/user-attachments/assets/9e54ad48-ede8-4eb4-b390-21fb9184616b)
+
 
 ## ⚙️ **2. Technologies Utilisées**
 
