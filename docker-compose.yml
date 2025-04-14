@@ -1,0 +1,153 @@
+version: "3.9"
+services:
+  eureka-server:
+    container_name: eureka-server
+    image: yassine057/eureka
+    build: ./Eureka_server
+    ports:
+      - "8761:8761"
+    environment:
+      - SPRING_APPLICATION_NAME=Eureka
+      - SERVER_PORT=8761
+      - EUREKA_CLIENT_REGISTER_WITH_EUREKA=false
+      - EUREKA_CLIENT_FETCH_REGISTRY=false
+
+  mysql-db:
+    image: mysql:8.0
+    container_name: mysql-db
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+      - MYSQL_DATABASE=user
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: unless-stopped
+
+  user-service:
+    container_name: user-service
+    build: ./user
+    image: yassine057/user
+    ports:
+      - "8086:8086"
+    environment:
+      - SPRING_APPLICATION_NAME=user
+      - SERVER_PORT=8086
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/user?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+      - mysql-db
+
+  hebergement-service:
+    container_name: hebergement-service
+    build: ./Hebergement
+    image: yassine057/hebergement
+    ports:
+      - "8088:8088"
+    environment:
+      - SPRING_APPLICATION_NAME=Hebergement
+      - SERVER_PORT=8088
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/Hebergement?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+      - mysql-db
+
+  vol-service:
+    container_name: vol-service
+    build: ./Vol_Management
+    image: yassine057/vol
+    ports:
+      - "8089:8089"
+    environment:
+      - SPRING_APPLICATION_NAME=Vol
+      - SERVER_PORT=8089
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/Vol_DB?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+      - mysql-db
+
+  offres-voyage-service:
+    container_name: offres-voyage-service
+    build: ./offresvoyage
+    image: yassine057/offresvoyage
+    ports:
+      - "8087:8087"
+    environment:
+      - SPRING_APPLICATION_NAME=OffresVoyage
+      - SERVER_PORT=8087
+      - SPRING_DATASOURCE_URL=jdbc:h2:file:./Database/Data/OffresVoyage
+      - SPRING_DATASOURCE_USERNAME=Nadine
+      - SPRING_DATASOURCE_PASSWORD=
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    volumes:
+      - ./offres-voyage-data:/app/Database/Data
+    depends_on:
+      - eureka-server
+
+  api-gateway:
+    container_name: api-gateway
+    image: yassine057/apigateway
+    build: ./ApiGateway-4SA11
+    ports:
+      - "8093:8093"
+    environment:
+      - SERVER_PORT=8093
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+      - user-service
+      - hebergement-service
+      - vol-service
+      - offres-voyage-service
+
+  angular-dev:
+   build:
+    context: ./agence-integration
+    dockerfile: Dockerfile
+   ports:
+    - "4200:4200"
+   volumes:
+    - ./agence-integration:/app
+    - /app/node_modules
+   environment:
+    - NODE_ENV=development
+    - CHOKIDAR_USEPOLLING=true  # Helps with file watching in Docker
+  
+  express:
+    build:
+     context: ./reservation
+     dockerfile: Dockerfile
+    container_name: express_app
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongo
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/reservation
+    volumes:
+      - .:/app
+    restart: always
+
+  mongo:
+    image: mongo:4
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    restart: always
+
+
+volumes:
+  mysql_data:
+  offres-voyage-data:
+  mongo-data:  # Ajoutez cette ligne pour définir le volume mongo-data
