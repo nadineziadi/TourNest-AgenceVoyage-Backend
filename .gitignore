@@ -1,0 +1,3 @@
+# Ignore environment and secret files
+reservation/.env
+user/src/main/resources/application.properties
